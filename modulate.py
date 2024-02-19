@@ -1,6 +1,7 @@
 import numpy
 from math import pi
 from matplotlib import pyplot
+from constants import *
 
 def bytes_to_bin(msg: bytes):
     """
@@ -34,11 +35,7 @@ def bytes_to_sig(msg: str, s0,s1):
 
 
 
-# CONSTANTS
-F0 = 320
-F1 = 500
-Fs = 8000 # samples per second
-Fb = 8    # bauds per second
+
 
 def main():
     samples_per_baud = Fs // Fb
