@@ -50,10 +50,15 @@ def main():
 
     msg = b"Q"
     signal = bytes_to_sig(msg,s0,s1)
-    pyplot.plot(s0)
-    pyplot.plot(s1)
-    pyplot.plot(signal)
-
+    fig, (spectrogram,sigplot,plot0,plot1) = pyplot.subplots(nrows=4)
+    spectrogram.set_ylabel("FFT of modulated signal")
+    spectrogram.specgram(signal,NFFT=256,Fs=Fs,noverlap=32)
+    sigplot.plot(signal)
+    sigplot.set_ylabel("Signal")
+    plot0.set_ylabel("0 tone")
+    plot0.plot(s0)
+    plot1.set_ylabel("1 tone")
+    plot1.plot(s1)
     pyplot.show()
 
 if __name__ == "__main__":
