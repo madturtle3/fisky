@@ -18,13 +18,13 @@ def bytes_to_bin(msg: bytes):
         msg_binary += byte_binary
     return msg_binary
 
-def bytes_to_sig(msg: str, s0,s1):
+def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
     """
     Take the bytes msg and make it into an fsk sig according to s0,s1
     """
     msg_binary = bytes_to_bin(msg)
     signal = numpy.empty(0)
-    # this part explains itself and is written to do so
+    
     for bit in msg_binary:
         if bit == "1":
             signal = numpy.concatenate((signal,s1))
