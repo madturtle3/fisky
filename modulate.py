@@ -30,8 +30,6 @@ def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
             signal = numpy.concatenate((signal,s1))
         if bit == "0":
             signal = numpy.concatenate((signal,s0))
-    # pad the end and start of the signal
-    signal = numpy.concatenate((signal,numpy.zeros(samples_per_baud)))
     return signal
 
 

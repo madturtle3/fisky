@@ -26,8 +26,18 @@ def main():
     msg = b"hello"
     signal = modulate.bytes_to_sig(msg,s0,s1)
 
+    # pad the end of the signal so it picks up the last baud
+    signal = numpy.concatenate((signal,numpy.zeros(samples_per_baud)))
+
+    # uncomment below to add noise
+    
+    #signal = numpy.add(signal,numpy.random.rand(len(signal)) * 5) / 6
     correlate0 = numpy.correlate(signal,s0)
     correlate1 = numpy.correlate(signal,s1)
+
+    # pad the correlation so the maxima align with the baud centers
+    correlate0 = numpy.concatenate((numpy.zeros(samples_per_baud//2),correlate0))
+    correlate1 = numpy.concatenate((numpy.zeros(samples_per_baud//2),correlate1))
 
     binary_msg = baud_picker(correlate0,correlate1,samples_per_baud)
     expected_msg = modulate.bytes_to_bin(msg)
@@ -37,14 +47,19 @@ def main():
 
     # all this is graphing stuff
     # NOTE: WHY do I get an extra (incorrect) bit at the start if I pad it
-    fig, (c0plot,c1plot,togetherplot) = pyplot.subplots(nrows=3,sharex=True)
+    fig, (c0plot,c1plot,togetherplot,sigplot) = pyplot.subplots(nrows=4,sharex=True)
     c0plot.set_title("s0 correlation")
-    c0plot.plot(correlate0)
+    c0plot.plot(correlate0, label="0 correlation")
+    c0plot.legend(loc='lower left')
     c1plot.set_title("s1 correlation")
-    c1plot.plot(correlate1)
+    c1plot.plot(correlate1, label="1 correlation")
+    c1plot.legend(loc='lower left')
     togetherplot.set_title("combined correlation")
-    togetherplot.plot(correlate0)
-    togetherplot.plot(correlate1)
+    togetherplot.plot(correlate0, label = "0 correlation")
+    togetherplot.plot(correlate1, label = "1 correlation")
+    togetherplot.legend(loc='lower left')
+    sigplot.plot(signal, label="signal plot")
+    sigplot.legend(loc='lower left')
     pyplot.show()
 
 if __name__ == "__main__":

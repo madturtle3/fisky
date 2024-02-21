@@ -1,7 +1,7 @@
 import numpy
 from math import pi
 F0 = 440
-F1 = 620
+F1 = 650
 Fs = 8000 # samples per second
 Fb = 8    # bauds per second
 
