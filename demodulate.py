@@ -19,19 +19,30 @@ def baud_picker(correlate0:numpy.ndarray, correlate1:numpy.ndarray, samples_per_
             picked_bauds += "0"
     return picked_bauds
 
-        
+def add_noise(signal,noise_multiplier):
+    if noise_multiplier > 0:
+        return numpy.add(signal,numpy.random.rand(len(signal)) * noise_multiplier) /(noise_multiplier) 
+    else:
+        return signal
 
+def delay_start(signal,start_delay):
+    return numpy.concatenate((numpy.zeros(start_delay),signal))
 
 def main():
-    msg = b"hello"
+    msg = b"Q"
     signal = modulate.bytes_to_sig(msg,s0,s1)
 
     # pad the end of the signal so it picks up the last baud
     signal = numpy.concatenate((signal,numpy.zeros(samples_per_baud)))
+    
+    # add a delay before the start of the signal
+    start_delay = 568
+    signal = delay_start(signal,start_delay)
 
     # uncomment below to add noise
-    
-    #signal = numpy.add(signal,numpy.random.rand(len(signal)) * 5) / 6
+    noise_multiplier = 15
+    signal = add_noise(signal,noise_multiplier)
+
     correlate0 = numpy.correlate(signal,s0)
     correlate1 = numpy.correlate(signal,s1)
 

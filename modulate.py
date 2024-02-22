@@ -14,7 +14,7 @@ def bytes_to_bin(msg: bytes):
     for byte in msg:
         byte_binary = bin(byte)[2:]
         # this pad the byte to proper length
-        byte_binary += "0" * (8 - len(byte_binary))
+        byte_binary += "0" * (7 - len(byte_binary))
         msg_binary += byte_binary
     return msg_binary
 
