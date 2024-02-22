@@ -25,6 +25,10 @@ def add_noise(signal,noise_multiplier):
     else:
         return signal
 
+def add_echo(signal,alpha,echo_time):
+    echo = numpy.concatenate(([1],numpy.zeros(echo_time),[alpha]))
+    return numpy.convolve(signal,echo)
+
 def delay_start(signal,start_delay):
     return numpy.concatenate((numpy.zeros(start_delay),signal))
 
@@ -36,12 +40,17 @@ def main():
     signal = numpy.concatenate((signal,numpy.zeros(samples_per_baud)))
     
     # add a delay before the start of the signal
-    start_delay = 568
+    start_delay = 0
     signal = delay_start(signal,start_delay)
 
     # uncomment below to add noise
     noise_multiplier = 15
     signal = add_noise(signal,noise_multiplier)
+
+    # add echo
+    alpha = .6
+    echo_time = 450
+    signal = add_echo(signal,alpha,echo_time)
 
     correlate0 = numpy.correlate(signal,s0)
     correlate1 = numpy.correlate(signal,s1)
