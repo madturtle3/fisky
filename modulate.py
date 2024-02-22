@@ -3,7 +3,7 @@ from math import pi
 from matplotlib import pyplot
 from constants import *
 
-def bytes_to_bin(msg: bytes):
+def bytes_to_bin(msg: str):
     """
     take msg (bytes) and turn it into binary
     I'm gonna use a string of 1s and 0s
@@ -11,11 +11,11 @@ def bytes_to_bin(msg: bytes):
     decoding the bytes in python
     """
     msg_binary = ""
-    for byte in msg:
-        byte_binary = bin(byte)[2:]
+    for char in msg:
+        char_binary = bin(ord(char))[2:]
         # this pad the byte to proper length
-        byte_binary += "0" * (7 - len(byte_binary))
-        msg_binary += byte_binary
+        char_binary = "0" * (char_length - len(char_binary)) + char_binary
+        msg_binary += char_binary
     return msg_binary
 
 def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
@@ -23,6 +23,8 @@ def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
     Take the bytes msg and make it into an fsk sig according to s0,s1
     """
     msg_binary = bytes_to_bin(msg)
+    # insert preamble
+    msg_binary = preamble + msg_binary
     signal = numpy.empty(0)
     
     for bit in msg_binary:
@@ -39,7 +41,7 @@ def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
 
 def main():
 
-    msg = b"Q"
+    msg = "Q"
     signal = bytes_to_sig(msg,s0,s1)
     fig, (spectrogram,sigplot,plot0,plot1) = pyplot.subplots(nrows=4)
     spectrogram.set_ylabel("FFT of modulated signal")
