@@ -41,7 +41,7 @@ def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
 
 def main():
 
-    msg = "Q"
+    msg = "I wonder what happens if bits get dropped during the transmission."
     signal = bytes_to_sig(msg,s0,s1)
     fig, (spectrogram,sigplot,plot0,plot1) = pyplot.subplots(nrows=4)
     spectrogram.set_ylabel("FFT of modulated signal")

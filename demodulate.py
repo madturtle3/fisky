@@ -2,6 +2,7 @@ from constants import *
 import numpy
 import modulate
 from matplotlib import pyplot
+from numpy.linalg import norm
 
 def baud_picker(correlate0:numpy.ndarray, correlate1:numpy.ndarray, samples_per_baud:int):
     """
@@ -40,6 +41,22 @@ def bin_to_ascii(msg):
                         msg[char_range:char_range+char_length],2)))
     return result
 
+
+def normalized_correlation(signal,template_normed):
+    """
+    Correlate the normalized signal with a (already normalized) template
+    """
+    correlation = numpy.empty(0)
+    index = 0
+    while index < len(signal)-len(template_normed):
+        chunk = signal[index:index+len(template_normed)]
+        chunk = chunk/norm(chunk)
+        corr_val = numpy.sum(chunk * template_normed)
+        correlation = numpy.append(correlation,corr_val)
+        index += 1
+        print(index,end="\r",flush=True)
+    return correlation
+
 def add_noise(signal,noise_multiplier):
     if noise_multiplier > 0:
         return numpy.add(signal,numpy.random.rand(len(signal)) * noise_multiplier) /(noise_multiplier) 
@@ -54,27 +71,32 @@ def delay_start(signal,start_delay):
     return numpy.concatenate((numpy.zeros(start_delay),signal))
 
 def main():
-    msg = "What is the weather today?"
+    msg = "I wonder what happens if bits get dropped during the transmission."
     signal = modulate.bytes_to_sig(msg,s0,s1)
 
     # pad the end of the signal so it picks up the last baud
     signal = numpy.concatenate((signal,numpy.zeros(samples_per_baud)))
     
+
     # add a delay before the start of the signal
     start_delay = 0
     signal = delay_start(signal,start_delay)
 
     # uncomment below to add noise
-    noise_multiplier = 3
+    noise_multiplier = 2
     signal = add_noise(signal,noise_multiplier)
+
 
     # add echo
     alpha = .6
     echo_time = 450
     #signal = add_echo(signal,alpha,echo_time)
 
-    correlate0 = numpy.correlate(signal,s0)
-    correlate1 = numpy.correlate(signal,s1)
+    # normalize templates
+    s0n = s0/norm(s0)
+    s1n = s1/norm(s1)
+    correlate0 = normalized_correlation(signal,s0n)
+    correlate1 = normalized_correlation(signal,s1n)
 
     # pad the correlation so the maxima align with the baud centers
     correlate0 = numpy.concatenate((numpy.zeros(samples_per_baud//2),correlate0))
@@ -83,9 +105,14 @@ def main():
     binary_msg = baud_picker(correlate0,correlate1,samples_per_baud)
     expected_msg = modulate.bytes_to_bin(msg)
 
-    if expected_msg == binary_msg[1]:
-        print('correct decode!')
-    print("English Message:".ljust(20),bin_to_ascii(binary_msg[1]))
+    if len(binary_msg) > 1:
+        if expected_msg == binary_msg[1]:
+            print('correct decode!')
+        print("English Message:".ljust(20),bin_to_ascii(binary_msg[1]))
+        print(binary_msg[1])
+    else:
+
+        print(expected_msg,binary_msg)
     # all this is graphing stuff
     # NOTE: WHY do I get an extra (incorrect) bit at the start if I pad it
     fig, (c0plot,c1plot,togetherplot,sigplot) = pyplot.subplots(nrows=4,sharex=True)
