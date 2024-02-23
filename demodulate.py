@@ -46,15 +46,11 @@ def normalized_correlation(signal,template_normed):
     """
     Correlate the normalized signal with a (already normalized) template
     """
-    correlation = numpy.empty(0)
-    index = 0
-    while index < len(signal)-len(template_normed):
+    correlation = numpy.empty(len(signal)-len(template_normed))
+    for index in numpy.arange(len(signal)-len(template_normed)):
         chunk = signal[index:index+len(template_normed)]
-        chunk = chunk/norm(chunk)
-        corr_val = numpy.sum(chunk * template_normed)
-        correlation = numpy.append(correlation,corr_val)
-        index += 1
-        print(index,end="\r",flush=True)
+        corr_val = numpy.sum(chunk * template_normed) / norm(chunk)
+        correlation[index] = corr_val
     return correlation
 
 def add_noise(signal,noise_multiplier):
@@ -70,20 +66,21 @@ def add_echo(signal,alpha,echo_time):
 def delay_start(signal,start_delay):
     return numpy.concatenate((numpy.zeros(start_delay),signal))
 
+
 def main():
-    msg = "I wonder what happens if bits get dropped during the transmission."
+    msg = "abcdefghijklmnopqrstuvwxyz"
     signal = modulate.bytes_to_sig(msg,s0,s1)
 
     # pad the end of the signal so it picks up the last baud
     signal = numpy.concatenate((signal,numpy.zeros(samples_per_baud)))
-    
+    #signal_old = signal.copy()
 
     # add a delay before the start of the signal
-    start_delay = 0
-    signal = delay_start(signal,start_delay)
+    start_delay = 2500
+    #signal = delay_start(signal,start_delay)
 
     # uncomment below to add noise
-    noise_multiplier = 2
+    noise_multiplier = 1
     signal = add_noise(signal,noise_multiplier)
 
 
@@ -104,7 +101,8 @@ def main():
 
     binary_msg = baud_picker(correlate0,correlate1,samples_per_baud)
     expected_msg = modulate.bytes_to_bin(msg)
-
+    # if numpy.array_equal(signal,signal_old):
+    #     print("they are the same")
     if len(binary_msg) > 1:
         if expected_msg == binary_msg[1]:
             print('correct decode!')
