@@ -2,6 +2,8 @@ import numpy
 from math import pi
 from matplotlib import pyplot
 from constants import *
+import sounddevice
+
 
 def bytes_to_bin(msg: str):
     """
@@ -25,7 +27,7 @@ def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
     msg_binary = bytes_to_bin(msg)
     # insert preamble
     msg_binary = preamble + msg_binary
-    signal = numpy.empty(0)
+    signal = numpy.empty(0,dtype=NP_FORMAT)
     
     for bit in msg_binary:
         if bit == "1":
@@ -41,18 +43,23 @@ def bytes_to_sig(msg: str, s0: numpy.ndarray,s1:numpy.ndarray):
 
 def main():
 
-    msg = "I wonder what happens if bits get dropped during the transmission."
+    msg = "HELLO"
     signal = bytes_to_sig(msg,s0,s1)
-    fig, (spectrogram,sigplot,plot0,plot1) = pyplot.subplots(nrows=4)
-    spectrogram.set_ylabel("FFT of modulated signal")
-    spectrogram.specgram(signal,NFFT=256,Fs=Fs,noverlap=32)
-    sigplot.plot(signal)
-    sigplot.set_ylabel("Signal")
-    plot0.set_ylabel("0 tone")
-    plot0.plot(s0)
-    plot1.set_ylabel("1 tone")
-    plot1.plot(s1)
-    pyplot.show()
+    padding = numpy.zeros(samples_per_baud,NP_FORMAT)
+    signal = numpy.concatenate((padding,signal,padding))
+    # fig, (spectrogram,sigplot,plot0,plot1) = pyplot.subplots(nrows=4)
+    # spectrogram.set_ylabel("FFT of modulated signal")
+    # spectrogram.specgram(signal,NFFT=256,Fs=Fs,noverlap=32)
+    # sigplot.plot(signal)
+    # sigplot.set_ylabel("Signal")
+    # plot0.set_ylabel("0 tone")
+    # plot0.plot(s0)
+    # plot1.set_ylabel("1 tone")
+    # plot1.plot(s1)
+    # pyplot.show()
+    sounddevice.play(signal,Fs)
+    sounddevice.wait()
+
 
 if __name__ == "__main__":
     main()
